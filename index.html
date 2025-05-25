@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificação de Senhas</title>
+    <link rel="icon" href="https://th.bing.com/th/id/OIP.lstUc6cyDQz__dz4KXRmmgHaHa?w=1080&h=1080&rs=1&pid=ImgDetMain" type="image/x-icon">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            block-size: 100vh;
+            background-color: #0E1113;
+            position: relative;
+            transition: background-color 0.3s;
+        }
+
+        .container {
+            text-align: center;
+            background-color: #0E1113;
+            padding: 40px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border-radius: 10px;
+            inline-size: 300px;
+            color: white;
+        }
+
+        .container img {
+            inline-size: 100px;
+            block-size: auto;
+            margin-block-end: 20px;
+        }
+
+        input[type="text"] {
+            padding: 10px;
+            font-size: 16px;
+            inline-size: 100%;
+            margin-block-end: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #0E1113;
+            color: #fff;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            inline-size: 100%;
+        }
+
+        .result {
+            margin-block-start: 20px;
+            font-size: 18px;
+            color: #f7f7f7;
+        }
+
+        .error {
+            color: red;
+        }
+
+        .success-background {
+            background-color: #28a745 !important;
+        }
+
+        .error-background {
+            background-color: #ff4d4d !important;
+        }
+
+        .audio-control {
+            margin-block-start: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            color: white;
+            background: none;
+            border: none;
+        }
+
+        #backgroundVideo, #deathMusic {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <img src="https://preview.redd.it/baseado-no-post-de-u-ocelot-prudent-tentei-fazer-o-s%C3%ADmbolo-v0-4b9910vo4okb1.png?width=640&crop=smart&auto=webp&s=36b943834ff800d558878fcd4490e3b63c1d0832" alt="Imagem central">
+    
+    <h1>Insira o código</h1>
+    <input type="text" id="codeInput" placeholder="Digite o código">
+    <button onclick="checkCode()">Verificar</button>
+    <div class="result" id="result"></div>
+
+    <button class="audio-control" onclick="toggleMusic()">⏸️ Pausar Música</button>
+</div>
+
+<audio id="successSound" src="https://www.soundjay.com/buttons/sounds/beep-24.mp3"></audio>
+<audio id="errorSound" src="https://www.soundjay.com/buttons/sounds/beep-03.mp3"></audio>
+
+<!-- Background music -->
+<iframe id="backgroundVideo" src="https://www.youtube.com/embed/MEDTO4aLTgg?autoplay=1&loop=1&playlist=MEDTO4aLTgg&enablejsapi=1" allow="autoplay" allowfullscreen></iframe>
+
+<!-- Death code music -->
+<iframe id="deathMusic" src="https://www.youtube.com/embed/kbFBPrRj9p8?enablejsapi=1&start=158" allow="autoplay" allowfullscreen></iframe>
+
+<script>
+    const codes = {
+        "Quadrado": "Significa W.</strong>",
+        "W": "Matou a Gloria.</strong>",
+        "Câmera": "Raio X de paranormal? <strong> </strong>",
+        "Gloria": "Morta pelos olhos amarelos <strong> </strong>",
+        "Olhos amarelos": "O Portador do conhecimento <strong> </strong>",
+        "Portador do conhecimento": "Está atrás da estátua do Buda de conhecimento <strong> </strong>",
+        "Buda de conhecimento": "Está com o Wade...  o Capitão <strong> </strong>",
+        "Morte": " <strong> Tudo em em seu devido tempo... </strong>",
+    };
+
+    function checkCode() {
+        const userInput = document.getElementById("codeInput").value;
+        const resultElement = document.getElementById("result");
+        const deathMusic = document.getElementById("deathMusic");
+        const backgroundVideo = document.getElementById("backgroundVideo");
+
+        if (codes[userInput]) {
+            resultElement.innerHTML = codes[userInput];
+            resultElement.classList.remove("error");
+            playSound('success');
+            animateBackground('success-background');
+
+            if (userInput === "Morte") {
+                backgroundVideo.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+                deathMusic.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+            } else {
+                backgroundVideo.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+                deathMusic.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+            }
+        } else {
+            resultElement.innerHTML = "Você é um fracasso. Tente novamente!";
+            resultElement.classList.add("error");
+            playSound('error');
+            animateBackground('error-background');
+        }
+    }
+
+    function playSound(type) {
+        const successSound = document.getElementById("successSound");
+        const errorSound = document.getElementById("errorSound");
+
+        if (type === 'success') {
+            successSound.play();
+        } else if (type === 'error') {
+            errorSound.play();
+        }
+    }
+
+    function animateBackground(className) {
+        document.body.classList.add(className);
+        setTimeout(() => {
+            document.body.classList.remove(className);
+        }, 300);
+    }
+
+    let isPlaying = true;
+
+    function toggleMusic() {
+        const video = document.getElementById("backgroundVideo");
+        if (isPlaying) {
+            video.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+            document.querySelector(".audio-control").textContent = "▶️ Retomar Música";
+        } else {
+            video.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+            document.querySelector(".audio-control").textContent = "⏸️ Pausar Música";
+        }
+        isPlaying = !isPlaying;
+    }
+</script>
+
+</body>
+</html>
+
