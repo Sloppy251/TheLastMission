@@ -109,15 +109,18 @@
 <audio id="successSound" src="https://www.soundjay.com/buttons/sounds/beep-24.mp3"></audio>
 <audio id="errorSound" src="https://www.soundjay.com/buttons/sounds/beep-03.mp3"></audio>
 
-<!-- Background music -->
-<iframe id="backgroundVideo" src="https://www.youtube.com/embed/MEDTO4aLTgg?autoplay=1&loop=1&playlist=MEDTO4aLTgg&enablejsapi=1" allow="autoplay" allowfullscreen></iframe>
+<!-- Div substituindo o iframe da música de fundo -->
+<div id="backgroundVideo"></div>
 
-<!-- Death code music -->
-<iframe id="deathMusic" src="https://www.youtube.com/embed/kbFBPrRj9p8?enablejsapi=1&start=158" allow="autoplay" allowfullscreen></iframe>
+<!-- Música de morte permanece com iframe -->
+<iframe id="deathMusic" src="https://www.youtube.com/embed/5umTCnNc7E0?enablejsapi=1&playlist=5umTCnNc7E0" allow="autoplay" allowfullscreen></iframe>
+
+<!-- API do YouTube -->
+<script src="https://www.youtube.com/iframe_api"></script>
 
 <script>
     const codes = {
-       "Pergaminho": "Locazilação.</strong>",
+        "Pergaminho": "Locazilação.</strong>",
         "encapuzados": "Capangas do capeta.</strong>",
         "Tridente": "Brincalhão. <strong> </strong>",
         "Embu das artes": "Cidade das artes <strong> </strong>",
@@ -132,19 +135,17 @@
         const userInput = document.getElementById("codeInput").value;
         const resultElement = document.getElementById("result");
         const deathMusic = document.getElementById("deathMusic");
-        const backgroundVideo = document.getElementById("backgroundVideo");
 
         if (codes[userInput]) {
             resultElement.innerHTML = codes[userInput];
             resultElement.classList.remove("error");
             playSound('success');
             animateBackground('success-background');
-
-            if (userInput === "Morte") {
-                backgroundVideo.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+            if (userInput === "Brincalhão") {
+                if (player) player.pauseVideo();
                 deathMusic.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
             } else {
-                backgroundVideo.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+                if (player) player.playVideo();
                 deathMusic.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
             }
         } else {
@@ -173,19 +174,47 @@
         }, 300);
     }
 
+    // YouTube API para controlar a música de fundo
+    let player;
     let isPlaying = true;
 
+    function onYouTubeIframeAPIReady() {
+        player = new YT.Player('backgroundVideo', {
+            height: '0',
+            width: '0',
+            videoId: 'uMkRnoXh2AY',
+            playerVars: {
+                autoplay: 1,
+                loop: 1,
+                playlist: 'uMkRnoXh2AY'
+            },
+            events: {
+                onReady: (event) => {
+                    event.target.setVolume(25); // Volume de 0 a 100
+                    event.target.playVideo();
+                }
+            }
+        });
+    }
+
     function toggleMusic() {
-        const video = document.getElementById("backgroundVideo");
+        if (!player) return;
         if (isPlaying) {
-            video.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+            player.pauseVideo();
             document.querySelector(".audio-control").textContent = "▶️ Retomar Música";
         } else {
-            video.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+            player.playVideo();
             document.querySelector(".audio-control").textContent = "⏸️ Pausar Música";
         }
         isPlaying = !isPlaying;
     }
+
+    // Ativar Enter para confirmar código
+    document.getElementById("codeInput").addEventListener("keydown", function(event) {
+        if (event.key === "Enter") {
+            checkCode();
+        }
+    });
 </script>
 
 </body>
